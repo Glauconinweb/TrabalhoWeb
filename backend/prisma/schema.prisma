@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String   @unique
+  password      String
+  telephone     String?
+  role          String   @default("jogador")
+  emailVerified Boolean  @default(false)
+}
+
+
+model TermoDefinicao {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  term       String
+  definition String
+  criadoPor  String?
+  criadoEm   DateTime @default(now())
+}
+
+model Categoria {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  nome     String
+  itens    Item[]
+}
+
+model Item {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  nome        String
+  categoriaId String?
+  categoria   Categoria? @relation(fields: [categoriaId], references: [id])
+}
+
+model Jogo {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  titulo       String
+  tipo         String
+  criadorId    String
+  criadoEm     DateTime @default(now())
+  visivel      Boolean  @default(true)
+  codigoAcesso String?  @unique
+  estrutura    Json
+}
+
+model Resultado {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  jogoId    String
+  acertos   Int
+  erros     Int
+  tempo     Int
+  pontuacao Int
+  criadoEm  DateTime @default(now())
+}
