@@ -1,3 +1,5 @@
+// src/controllers/authController.js
+
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -9,9 +11,21 @@ const prisma = new PrismaClient();
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-// Registro com verificação de email
+const createTransporter = () =>
+  nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+
+// Registro - cria token e envia email para backend validar
 export const register = async (req, res) => {
-  const { nome, email, senha, telefone } = req.body;
+  const { role, nome, email, senha, telefone } = req.body;
 
   try {
     if (!nome || !email || !senha) {
@@ -31,56 +45,77 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(senha, 10);
 
-    const novoUsuario = await prisma.user.create({
-      data: {
-        name: nome,
-        email,
-        password: hashedPassword,
-        telephone: telefone || null,
-        emailVerified: false,
-      },
-    });
+    // Gerar token com dados do usuário (não salva ainda no banco)
+    const token = jwt.sign(
+      { nome, email, senha: hashedPassword, telefone, role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    // Gera token JWT para verificação
-    const token = jwt.sign({ userId: novoUsuario.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    // Link aponta para backend para validação do token e criação do usuário
+    const verificationLink = `${process.env.BACKEND_URL}/auth/verify-email/${token}`;
 
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${token}`;
+    const transporter = createTransporter();
 
-    // Configura transporte de email
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    // Envia email de verificação
     await transporter.sendMail({
       from: `"Plataforma Educativa" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Verifique seu e-mail",
       html: `
         <p>Olá ${nome},</p>
-        <p>Por favor, clique no link abaixo para verificar seu e-mail:</p>
+        <p>Por favor, clique no link abaixo para verificar seu e-mail e concluir seu cadastro:</p>
         <a href="${verificationLink}">${verificationLink}</a>
         <p>O link expira em 1 hora.</p>
       `,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message:
-        "Usuário registrado! Verifique seu e-mail para ativar sua conta.",
+        "Verifique seu e-mail para concluir o cadastro. O link expira em 1 hora.",
     });
   } catch (error) {
-    console.error("Erro no registro:", error);
-    res.status(500).json({ error: "Erro interno do servidor" });
+    console.error("[register] Erro:", error.message || error);
+    return res.status(500).json({ error: "Erro interno do servidor" });
   }
 };
 
-// Login com verificação de email
+// Verificação do email via link (backend recebe token, valida e cria usuário)
+export const verifyEmail = async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const { nome, email, senha, telefone, role } = decoded;
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .send("Este e-mail já foi verificado anteriormente.");
+    }
+
+    await prisma.user.create({
+      data: {
+        name: nome,
+        email: email,
+        password: senha,
+        telephone: telefone || null,
+        emailVerified: true,
+        role: role || "jogador",
+      },
+    });
+
+    // Redireciona para frontend com sucesso (você pode criar uma página legal lá)
+    return res.redirect(`${process.env.FRONTEND_URL}/login?verified=true`);
+  } catch (error) {
+    console.error("[verifyEmail] Erro:", error.message || error);
+    return res.status(400).send("Link inválido ou expirado.");
+  }
+};
+
+// Login com validação do email verificado
 export const login = async (req, res) => {
   const { email, senha } = req.body;
 
@@ -106,54 +141,36 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    res.json({
+    return res.json({
       token,
       usuario: {
+        id: user.id,
         nome: user.name,
         email: user.email,
         telefone: user.telephone,
+        role: user.role,
       },
     });
   } catch (error) {
-    console.error("Erro no login:", error);
-    res.status(500).json({ error: "Erro interno do servidor" });
+    console.error("[login] Erro:", error.message || error);
+    return res.status(500).json({ error: "Erro interno do servidor" });
   }
 };
 
-// Verificação do email via link
-export const verifyEmail = async (req, res) => {
-  const { token } = req.params;
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId;
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: { emailVerified: true },
-    });
-
-    res.send("E-mail verificado com sucesso! Você já pode fazer login.");
-  } catch (error) {
-    console.error("Erro ao verificar email:", error);
-    res.status(400).send("Link inválido ou expirado.");
-  }
-};
-
-// Recuperação de senha - envio do link
+// Recuperação de senha - envio do link por email
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
-  if (!email || !isValidEmail(email)) {
-    return res.status(400).json({ error: "E-mail inválido." });
-  }
-
   try {
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({ error: "E-mail inválido." });
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(404).json({ error: "E-mail não encontrado." });
@@ -165,13 +182,7 @@ export const forgotPassword = async (req, res) => {
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const transporter = createTransporter();
 
     await transporter.sendMail({
       from: `"Suporte da Plataforma" <${process.env.EMAIL_USER}>`,
@@ -186,25 +197,29 @@ export const forgotPassword = async (req, res) => {
       `,
     });
 
-    res.json({ message: "Email de recuperação enviado com sucesso!" });
+    return res.json({ message: "Email de recuperação enviado com sucesso!" });
   } catch (error) {
-    console.error("Erro ao enviar email de recuperação:", error);
-    res.status(500).json({ error: "Erro ao enviar email de recuperação." });
+    console.error("[forgotPassword] Erro:", error.message || error);
+    return res
+      .status(500)
+      .json({ error: "Erro ao enviar email de recuperação." });
   }
 };
 
 // Exclusão de usuário
 export const deleteUser = async (req, res) => {
   const { id } = req.params;
+
   try {
     if (!id || typeof id !== "string") {
       return res.status(400).json({ error: "ID inválido." });
     }
 
     await prisma.user.delete({ where: { id } });
-    res.json({ message: "Usuário removido com sucesso!" });
+
+    return res.json({ message: "Usuário removido com sucesso!" });
   } catch (error) {
-    console.error("Erro ao remover usuário:", error);
-    res.status(500).json({ error: "Erro interno do servidor" });
+    console.error("[deleteUser] Erro:", error.message || error);
+    return res.status(500).json({ error: "Erro interno do servidor" });
   }
 };

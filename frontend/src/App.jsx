@@ -7,7 +7,11 @@ import {
 } from "react-router-dom";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword"; // ✅ IMPORTAR AQUI
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyEmail from "./pages/VerifyEmail";
+import Home from "./pages/Home";
+import PainelOfCreator from "./pages/PainelOfCreator";
+import Jogar from "./pages/Jogar";
 
 export default function App() {
   return (
@@ -17,7 +21,11 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
-        {/* aqui pode criar outras rotas como dashboard, home, etc */}
+        <Route path="/verify-email/:token" element={<VerifyEmail />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/painelOfCreator" element={<PainelOfCreator />} />
+        <Route path="/jogar/:id" element={<Jogar />} />
+        {/* Adicione outras rotas conforme necessário */}
       </Routes>
     </Router>
   );

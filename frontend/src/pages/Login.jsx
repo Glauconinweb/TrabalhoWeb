@@ -32,7 +32,12 @@ export default function Login() {
       sessionStorage.setItem("token", dados.token);
       sessionStorage.setItem("usuarioLogado", JSON.stringify(dados.usuario));
 
-      navigate("/home"); // redireciona para página principal
+      // ✅ Redirecionamento baseado no papel (role)
+      if (dados.usuario.role === "criador") {
+        navigate("/painelOfCreator"); // jogador vai para o painel do criador
+      } else {
+        navigate("/home"); // jogador vai para página padrão
+      }
     } catch (erro) {
       alert("Erro de conexão com o servidor.");
       console.error("Erro:", erro);
@@ -50,17 +55,19 @@ export default function Login() {
               type="email"
               name="email"
               placeholder="E-mail"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <i class="bx bx-envelope"></i>
+            <i className="bx bx-envelope"></i>
           </div>
           <div className="input-box">
             <input
               type={mostrarSenha ? "text" : "password"}
               name="senha"
               placeholder="Senha"
+              autoComplete="current-password"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
@@ -76,11 +83,13 @@ export default function Login() {
             Entrar
           </button>
         </form>
+
         <p className="register-link">
-          <a href="/register">Não tem uma conta ? Cadastre-se aqui!</a>
+          Não tem uma conta? <a href="/register">Cadastre-se aqui!</a>
         </p>
+
         <button onClick={irparaforgot} className="login">
-          Esqueceu a senha ? Clique aqui !
+          Esqueceu a senha? Clique aqui!
         </button>
       </main>
     </>

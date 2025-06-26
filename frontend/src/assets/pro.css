@@ -1,0 +1,179 @@
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  font-family: "Poppins", sans-serif;
+}
+
+/* Conteiner principal */
+.conteiner1 {
+  max-width: 800px;
+  margin: 80px auto;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+/* Títulos */
+h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #66bb6a;
+}
+h3 {
+  font-size: 1.3rem;
+  margin: 20px 0 10px;
+  color: #a5d6a7;
+}
+
+/* Formulário */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Inputs e Select */
+.input-box input,
+.input-box select,
+.estrutura input {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #1e1e1e;
+  color: #ffffff;
+  font-size: 1rem;
+  transition: border 0.2s ease;
+}
+
+.input-box select {
+  appearance: none;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid #66bb6a;
+}
+
+/* Estrutura do jogo (par termo-definição/item-categoria) */
+.estrutura {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.estrutura input {
+  flex: 1;
+  min-width: 150px;
+}
+
+/* Botões */
+button {
+  background: linear-gradient(90deg, #43a047, #2e7d32);
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.25);
+}
+
+button:hover {
+  background: linear-gradient(90deg, #2e7d32, #43a047);
+  transform: scale(1.03);
+}
+
+/* Botão de excluir */
+li button {
+  background: #1ea31e62;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-left: 10px;
+}
+
+li button:hover {
+  background: #53f508;
+}
+
+/* Lista de pares e jogos */
+ul {
+  list-style: none;
+  margin: 10px 0;
+  padding: 0;
+}
+
+ul li {
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  color: #ddd;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Links ou ações */
+a,
+button:link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Mensagem de nenhum jogo criado */
+p {
+  font-size: 1rem;
+  color: #ccc;
+  margin-top: 10px;
+}
+
+/* Linha divisória */
+hr {
+  border: none;
+  height: 1px;
+  background: #333;
+  margin: 2rem 0;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  .conteiner {
+    margin: 40px 12px;
+    padding: 24px;
+  }
+
+  .estrutura {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  ul li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  li button {
+    margin-left: 0;
+    width: 100%;
+  }
+}

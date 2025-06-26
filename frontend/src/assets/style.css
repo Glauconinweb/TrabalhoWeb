@@ -3,16 +3,19 @@
   padding: 0;
   box-sizing: border-box;
 }
+
 body {
   font-family: "Poppins", sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  /* REMOVIDO display:flex para evitar duplicação lado a lado */
   background-size: cover;
   background-position: center;
 }
-background-video {
+
+/* Corrigido seletor do vídeo: assumindo que o vídeo tem a tag <video> */
+video {
   position: fixed;
   top: 0;
   left: 0;
@@ -22,8 +25,10 @@ background-video {
   z-index: -1;
   filter: brightness(0.7); /* opcional para escurecer um pouco */
 }
+
 .conteiner {
   width: 420px;
+  margin: 0 auto; /* centraliza horizontalmente */
   background-color: transparent;
   border: 2px solid;
   border-radius: 10px;
@@ -33,19 +38,36 @@ background-video {
     rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
     rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
 }
+.conteiner1 {
+  width: 420px;
+  margin: 0 auto;
+  background: url("../public/Goku.gif") no-repeat center center;
+  background-size: cover; /* faz a imagem preencher todo o espaço */
+  border: 2px solid;
+  border-radius: 10px;
+  color: #fff;
+  padding: 30px 40px;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
+    rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
+    rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+}
+
 .conteiner h1 {
   font-size: 36px;
   text-align: center;
 }
+
 .conteiner p {
   font-size: 14px;
   text-align: center;
   margin: 10px 0 20px;
 }
+
 .input-box {
   position: relative;
   padding: 20px 0;
 }
+
 .input-box input {
   width: 100%;
   height: 100%;
@@ -57,33 +79,40 @@ background-video {
   color: #fff;
   padding: 20px 45px 20px 20px;
 }
+
 .input-box input::placeholder {
   color: #fff;
 }
+
 .input-box i {
   position: absolute;
   right: 20px;
   font-size: 20px;
   top: 50%;
-  transform: translatey(-50%);
+  transform: translateY(-50%);
 }
+
 .remenber-forgot {
   display: flex;
   justify-content: space-between;
   margin: -15px 0 15px;
   padding: 20px 10px 0 0;
 }
+
 .remenber-forgot label input {
   accent-color: #fff;
   margin-right: 5px;
 }
+
 .remenber-forgot a {
   text-decoration: none;
   color: #fff;
 }
+
 .remenber-forgot a:hover {
   text-decoration: underline;
 }
+
 .login {
   width: 100%;
   height: 50px;
@@ -91,19 +120,22 @@ background-video {
   border: none;
   border-radius: 40px;
   cursor: pointer;
-  font-size: #333;
   font-weight: 600;
   margin-top: 20px;
   box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
     rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
     rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+  color: #333;
+  font-size: 16px;
 }
+
 .login:hover {
   background-color: transparent;
-  border: 2px solid;
+  border: 2px solid #fff;
   color: #fff;
   transition: 0.3s;
 }
+
 .register-link {
   color: #fff;
   font-size: 14px;
@@ -111,14 +143,47 @@ background-video {
   margin: 20px 0 15px;
   padding: 20px 10px 0 0;
 }
+.role-selector label {
+  padding: 45px;
+  padding-bottom: 10px;
+}
+.role-selector {
+  padding-top: 15px;
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1.5rem;
+}
+
+.role-selector label {
+  background: black;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.role-selector label.selected {
+  background-color: #4caf50;
+  color: white;
+  border-color: #388e3c;
+}
+
+.role-selector input {
+  display: none;
+}
+
 .register-link a {
   text-decoration: none;
   color: #fff;
   font-weight: 600;
 }
+
 .register-link a:hover {
   text-decoration: underline;
 }
+
 .login,
 a {
   text-decoration: none;
