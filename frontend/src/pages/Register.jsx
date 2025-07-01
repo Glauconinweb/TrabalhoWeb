@@ -123,7 +123,7 @@ export default function Register() {
               />
               <i className="bx bx-phone"></i>
             </div>
-            <button type="submit" className="login">
+            <button id="a" type="submit" className="login">
               Criar Conta
             </button>
           </form>

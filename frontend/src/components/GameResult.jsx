@@ -96,7 +96,9 @@ const GameResult = ({ score, erros, time, jogoId }) => {
         <p>{saveStatus}</p>
         <div>
           <button onClick={handleRestartGame}>Reiniciar Jogo</button>
-          <button onClick={handleGoHome}>Voltar para Home</button>
+          <br />
+          <button onClick={handleGoHome}>Area Games</button>
+          <br />
           <button onClick={() => setShowRanking((v) => !v)}>
             {showRanking ? "Esconder Ranking" : "Ver Ranking"}
           </button>

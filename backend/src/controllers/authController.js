@@ -58,7 +58,7 @@ export const register = async (req, res) => {
     const transporter = createTransporter();
 
     await transporter.sendMail({
-      from: `"Plataforma Educativa" <${process.env.EMAIL_USER}>`,
+      from: `"Plataforma Games" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Verifique seu e-mail",
       html: `
@@ -91,9 +91,7 @@ export const verifyEmail = async (req, res) => {
     const existingUser = await prisma.user.findUnique({ where: { email } });
 
     if (existingUser) {
-      return res
-        .status(400)
-        .send("Este e-mail já foi verificado anteriormente.");
+      return res.status(400).send("Este e-mail já foi verificado !.");
     }
 
     await prisma.user.create({

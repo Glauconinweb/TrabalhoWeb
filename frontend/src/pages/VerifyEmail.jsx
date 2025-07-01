@@ -12,7 +12,7 @@ export default function VerifyEmail() {
     const verificarEmail = async () => {
       try {
         const resposta = await fetch(
-          `http://localhost:5000/auth/verify-email/${token}`
+          `http://locahost:5000/auth/verify-email/${token}`
         );
         const texto = await resposta.text();
 

@@ -18,10 +18,31 @@ export default function Jogar() {
   const [gameOver, setGameOver] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
 
-  // Função auxiliar para tocar sons (RF07)
+  // Estado para jogo-memoria
+  const [cards, setCards] = useState([]);
+  const [flippedIndices, setFlippedIndices] = useState([]); // indices das cartas viradas
+  const [matchedIndices, setMatchedIndices] = useState([]); // indices das cartas já encontradas
+
+  // Função para tocar sons
   const playSound = (src) => {
     const audio = new Audio(src);
     audio.play().catch((e) => console.warn("Erro ao tocar som:", e));
+  };
+
+  // Embaralhar array
+  const shuffleArray = (array) => {
+    let currentIndex = array.length,
+      randomIndex;
+    const arr = [...array];
+    while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      [arr[currentIndex], arr[randomIndex]] = [
+        arr[randomIndex],
+        arr[currentIndex],
+      ];
+    }
+    return arr;
   };
 
   useEffect(() => {
@@ -38,6 +59,7 @@ export default function Jogar() {
       .then((data) => {
         setJogo(data);
         setStartTime(Date.now());
+
         if (data.tipo === "termo-definicao") {
           setGameData(
             data.estrutura.map((pair) => ({
@@ -47,6 +69,12 @@ export default function Jogar() {
           );
         } else if (data.tipo === "item-categoria") {
           setGameData(shuffleArray(data.estrutura));
+        } else if (data.tipo === "jogo-memoria") {
+          // Criar pares (duplicar) e embaralhar
+          const duplicated = [...data.estrutura, ...data.estrutura];
+          setCards(shuffleArray(duplicated));
+        } else if (data.tipo === "jogo-sabedoria") {
+          setGameData(data.estrutura);
         }
       })
       .catch((error) => {
@@ -56,62 +84,79 @@ export default function Jogar() {
     // eslint-disable-next-line
   }, [id]);
 
-  const shuffleArray = (array) => {
-    let currentIndex = array.length,
-      randomIndex;
-    while (currentIndex !== 0) {
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-      [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex],
-        array[currentIndex],
-      ];
+  // --- Lógica jogo-memoria ---
+
+  const handleCardClick = (index) => {
+    if (
+      flippedIndices.length === 2 ||
+      flippedIndices.includes(index) ||
+      matchedIndices.includes(index)
+    )
+      return;
+
+    const newFlipped = [...flippedIndices, index];
+    setFlippedIndices(newFlipped);
+
+    if (newFlipped.length === 2) {
+      const [first, second] = newFlipped;
+      if (cards[first].imagemUrl === cards[second].imagemUrl) {
+        setMatchedIndices((prev) => [...prev, first, second]);
+        setScore((prev) => prev + 10);
+        playSound("/sounds/correto.wav");
+        setCorrectStreak((prev) => prev + 1);
+        if (correctStreak + 1 >= 3) {
+          setScore((prev) => prev + 5);
+          playSound("/sounds/escolha.wav");
+        }
+        setFeedback("Par encontrado!");
+      } else {
+        setErros((prev) => prev + 1);
+        setCorrectStreak(0);
+        playSound("/sounds/erro.wav");
+        setFeedback("Errado! Tente novamente.");
+      }
+
+      // Desvirar as cartas depois de 1.5s
+      setTimeout(() => {
+        setFlippedIndices([]);
+        setFeedback(null);
+      }, 1500);
     }
-    return array;
   };
 
-  if (!jogo || gameData.length === 0) return <p>Carregando jogo...</p>;
-
-  if (gameOver) {
-    return (
-      <GameResult
-        score={score}
-        erros={erros}
-        time={(endTime - startTime) / 1000}
-        jogoId={jogo.id}
-      />
-    );
-  }
-
-  const currentItem = gameData[currentIndex];
-
-  const handleAnswer = (answer) => {
-    setSelectedAnswer(answer);
-    let isCorrect = false;
-    let points = 0;
-
-    if (jogo.tipo === "termo-definicao") {
-      isCorrect = answer === currentItem.definition;
-      points = isCorrect ? 10 : 0;
-    } else if (jogo.tipo === "item-categoria") {
-      isCorrect = answer === currentItem.category;
-      points = isCorrect ? 10 : 0;
+  useEffect(() => {
+    if (
+      jogo?.tipo === "jogo-memoria" &&
+      matchedIndices.length === cards.length &&
+      cards.length > 0
+    ) {
+      setEndTime(Date.now());
+      setGameOver(true);
     }
+  }, [matchedIndices, cards, jogo]);
+
+  // --- Lógica jogo-sabedoria ---
+
+  const handleAnswerSabedoria = (answer) => {
+    setSelectedAnswer(answer);
+    const currentQuestion = gameData[currentIndex];
+    const isCorrect = answer === currentQuestion.correta;
+    let points = isCorrect ? 10 : 0;
 
     if (isCorrect) {
       setFeedback("Correto!");
       setScore((prev) => prev + points);
       setCorrectStreak((prev) => prev + 1);
-      playSound("/sounds/correct.mp3");
+      playSound("/sounds/correto.wav");
       if (correctStreak + 1 >= 3) {
         setScore((prev) => prev + 5);
-        playSound("/sounds/bonus.mp3");
+        playSound("/sounds/escolha.wav");
       }
     } else {
       setFeedback("Errado! Tente novamente.");
       setErros((prev) => prev + 1);
       setCorrectStreak(0);
-      playSound("/sounds/wrong.mp3");
+      playSound("/sounds/erro.wav");
     }
 
     setTimeout(() => {
@@ -126,21 +171,23 @@ export default function Jogar() {
     }, 1500);
   };
 
+  // --- Renderização do conteúdo ---
+
   const renderGameContent = () => {
     if (jogo.tipo === "termo-definicao") {
       return (
         <>
           <p>Termo:</p>
-          <h3>{currentItem.term}</h3>
+          <h3>{gameData[currentIndex].term}</h3>
           <div>
-            {currentItem.options.map((def, i) => (
+            {gameData[currentIndex].options.map((def, i) => (
               <button
                 key={i}
                 onClick={() => handleAnswer(def)}
                 disabled={!!feedback}
                 className={
                   feedback
-                    ? def === currentItem.definition
+                    ? def === gameData[currentIndex].definition
                       ? "btn-correto"
                       : selectedAnswer === def
                       ? "btn-errado"
@@ -159,7 +206,7 @@ export default function Jogar() {
       return (
         <>
           <p>Item:</p>
-          <h3>{currentItem.item}</h3>
+          <h3>{gameData[currentIndex].item}</h3>
           <div>
             {shuffleArray(allCategories).map((cat, i) => (
               <button
@@ -168,7 +215,7 @@ export default function Jogar() {
                 disabled={!!feedback}
                 className={
                   feedback
-                    ? cat === currentItem.category
+                    ? cat === gameData[currentIndex].category
                       ? "btn-correto"
                       : selectedAnswer === cat
                       ? "btn-errado"
@@ -182,20 +229,140 @@ export default function Jogar() {
           </div>
         </>
       );
+    } else if (jogo.tipo === "jogo-memoria") {
+      return (
+        <>
+          <p>Encontre os pares das imagens iguais:</p>
+          <div className="memory-container">
+            <div className="memory-grid">
+              {cards.map((card, idx) => {
+                const isFlipped =
+                  flippedIndices.includes(idx) || matchedIndices.includes(idx);
+
+                return (
+                  <div
+                    key={idx}
+                    className={`memory-card ${isFlipped ? "flipped" : ""}`}
+                    onClick={() => handleCardClick(idx)}
+                  >
+                    <div className="memory-card-inner">
+                      <div className="memory-card-front" />
+                      <div className="memory-card-back">
+                        <img src={card.imagemUrl} alt="imagem" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {feedback && <p className="feedback-message">{feedback}</p>}
+          <p>Pontuação: {score}</p>
+        </>
+      );
+    } else if (jogo.tipo === "jogo-sabedoria") {
+      const question = gameData[currentIndex];
+      return (
+        <>
+          <p>Pergunta:</p>
+          <h3>{question.pergunta}</h3>
+          <div>
+            {question.alternativas.map((alt, i) => (
+              <button
+                key={i}
+                onClick={() => handleAnswerSabedoria(alt)}
+                disabled={!!feedback}
+                className={
+                  feedback
+                    ? alt === question.correta
+                      ? "btn-correto"
+                      : selectedAnswer === alt
+                      ? "btn-errado"
+                      : ""
+                    : ""
+                }
+              >
+                {alt}
+              </button>
+            ))}
+          </div>
+        </>
+      );
     }
+
     return <p>Tipo de jogo não suportado.</p>;
   };
+
+  // Reuso da função para termo-definição e item-categoria
+  const handleAnswer = (answer) => {
+    setSelectedAnswer(answer);
+    let isCorrect = false;
+    let points = 0;
+
+    if (jogo.tipo === "termo-definicao") {
+      isCorrect = answer === gameData[currentIndex].definition;
+      points = isCorrect ? 10 : 0;
+    } else if (jogo.tipo === "item-categoria") {
+      isCorrect = answer === gameData[currentIndex].category;
+      points = isCorrect ? 10 : 0;
+    }
+
+    if (isCorrect) {
+      setFeedback("Correto!");
+      setScore((prev) => prev + points);
+      setCorrectStreak((prev) => prev + 1);
+      playSound("/sounds/correto.wav");
+      if (correctStreak + 1 >= 3) {
+        setScore((prev) => prev + 5);
+        playSound("/sounds/escolha.wav");
+      }
+    } else {
+      setFeedback("Errado! Tente novamente.");
+      setErros((prev) => prev + 1);
+      setCorrectStreak(0);
+      playSound("/sounds/erro.wav");
+    }
+
+    setTimeout(() => {
+      setFeedback(null);
+      setSelectedAnswer(null);
+      if (currentIndex < gameData.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+      } else {
+        setEndTime(Date.now());
+        setGameOver(true);
+      }
+    }, 1500);
+  };
+
+  if (!jogo) return <p>Carregando jogo...</p>;
+
+  if (gameOver) {
+    return (
+      <GameResult
+        score={score}
+        erros={erros}
+        time={(endTime - startTime) / 1000}
+        jogoId={jogo.id}
+      />
+    );
+  }
 
   return (
     <>
       <BackgroundVideo />
       <div className="conteiner">
         <h2>{jogo.titulo}</h2>
-        <p>
-          Pergunta {currentIndex + 1} de {gameData.length}
-        </p>
+        {jogo.tipo !== "jogo-memoria" && jogo.tipo !== "jogo-sabedoria" && (
+          <p>
+            Pergunta {currentIndex + 1} de {gameData.length}
+          </p>
+        )}
         {renderGameContent()}
-        {feedback && <p className="feedback-message">{feedback}</p>}
+        {feedback && jogo.tipo !== "jogo-memoria" && (
+          <p className="feedback-message">{feedback}</p>
+        )}
         <p>Pontuação: {score}</p>
       </div>
     </>

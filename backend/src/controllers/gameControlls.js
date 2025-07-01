@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 
 const prisma = new PrismaClient();
 
-// Criar novo jogo (termo-definição ou item-categoria)
+// Criar novo jogo
 export const createGame = async (req, res) => {
   const { titulo, tipo, estrutura, criadorId } = req.body;
 
@@ -12,8 +12,50 @@ export const createGame = async (req, res) => {
     return res.status(400).json({ error: "Preencha todos os campos." });
   }
 
-  const codigoAcesso = uuidv4().slice(2, 8);
-  codigoAcesso; // código único de 8 caracteres
+  if (tipo === "jogo-memoria") {
+    if (
+      !Array.isArray(estrutura) ||
+      estrutura.length === 0 ||
+      estrutura.length > 10
+    ) {
+      return res.status(400).json({ error: "Adicione entre 1 e 10 imagens." });
+    }
+
+    const todasValidas = estrutura.every(
+      (img) => typeof img.imagemUrl === "string" && img.imagemUrl.trim() !== ""
+    );
+
+    if (!todasValidas) {
+      return res.status(400).json({
+        error: "Todas as imagens devem ter um campo 'imagemUrl' válido.",
+      });
+    }
+  }
+
+  if (tipo === "jogo-sabedoria") {
+    if (!Array.isArray(estrutura) || estrutura.length === 0) {
+      return res.status(400).json({ error: "Adicione ao menos uma pergunta." });
+    }
+
+    const todasValidas = estrutura.every((pergunta) => {
+      return (
+        typeof pergunta.pergunta === "string" &&
+        Array.isArray(pergunta.alternativas) &&
+        pergunta.alternativas.length >= 2 &&
+        typeof pergunta.correta === "string" &&
+        pergunta.alternativas.includes(pergunta.correta)
+      );
+    });
+
+    if (!todasValidas) {
+      return res.status(400).json({
+        error:
+          "Verifique se todas as perguntas possuem: texto, pelo menos 2 alternativas e uma resposta correta válida.",
+      });
+    }
+  }
+
+  const codigoAcesso = uuidv4().slice(0, 8);
 
   try {
     const novoJogo = await prisma.jogo.create({
@@ -22,7 +64,7 @@ export const createGame = async (req, res) => {
         tipo,
         criadorId,
         estrutura,
-        codigoAcesso: uuidv4().slice(0, 8), // código único de 8 caracteres
+        codigoAcesso,
       },
     });
 
@@ -83,41 +125,8 @@ export const deleteGame = async (req, res) => {
     return res.status(500).json({ error: "Erro ao excluir jogo." });
   }
 };
-export const getRankingByJogoId = async (req, res) => {
-  const { jogoId } = req.params;
 
-  try {
-    // Busca os resultados do jogo, ordenados pela pontuação decrescente
-    const resultados = await prisma.resultado.findMany({
-      where: { jogoId },
-      orderBy: { pontuacao: "desc" },
-      take: 10,
-    });
-
-    // Pega todos os userIds dos resultados para buscar usuários
-    const userIds = resultados.map((r) => r.userId);
-
-    // Busca usuários correspondentes (só id e nome)
-    const usuarios = await prisma.user.findMany({
-      where: { id: { in: userIds } },
-      select: { id: true, name: true },
-    });
-
-    // Junta cada resultado com seu usuário
-    const ranking = resultados.map((res) => {
-      const usuario = usuarios.find((u) => u.id === res.userId);
-      return {
-        ...res,
-        user: usuario || null,
-      };
-    });
-
-    return res.json(ranking);
-  } catch (error) {
-    console.error("[getRankingByJogoId] Erro:", error);
-    return res.status(500).json({ error: "Erro ao buscar ranking." });
-  }
-};
+// Salvar resultado do jogo
 export const saveResult = async (req, res) => {
   const { userId, jogoId, acertos, erros, tempo, pontuacao } = req.body;
 
@@ -126,6 +135,20 @@ export const saveResult = async (req, res) => {
   }
 
   try {
+    // Verificar se já existe um resultado igual
+    const resultadoDuplicado = await prisma.resultado.findFirst({
+      where: {
+        userId,
+        jogoId,
+        pontuacao,
+        tempo,
+      },
+    });
+
+    if (resultadoDuplicado) {
+      return res.status(200).json({ mensagem: "Resultado já registrado." });
+    }
+
     const novoResultado = await prisma.resultado.create({
       data: {
         userId,
@@ -140,5 +163,48 @@ export const saveResult = async (req, res) => {
   } catch (error) {
     console.error("Erro ao salvar resultado:", error);
     res.status(500).json({ error: "Erro ao salvar resultado." });
+  }
+};
+
+// Ranking por jogo (melhor resultado por usuário)
+export const getRankingByJogoId = async (req, res) => {
+  const { jogoId } = req.params;
+
+  try {
+    const todosResultados = await prisma.resultado.findMany({
+      where: { jogoId },
+      orderBy: [{ userId: "asc" }, { pontuacao: "desc" }, { tempo: "asc" }],
+    });
+
+    const melhoresPorUsuario = new Map();
+    for (const r of todosResultados) {
+      if (!melhoresPorUsuario.has(r.userId)) {
+        melhoresPorUsuario.set(r.userId, r);
+      }
+    }
+
+    const rankingFinal = Array.from(melhoresPorUsuario.values());
+
+    const userIds = rankingFinal.map((r) => r.userId);
+    const usuarios = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true },
+    });
+
+    const rankingComUsuario = rankingFinal
+      .map((res) => ({
+        ...res,
+        user: usuarios.find((u) => u.id === res.userId) || null,
+      }))
+      .sort((a, b) => {
+        if (b.pontuacao !== a.pontuacao) return b.pontuacao - a.pontuacao;
+        return a.tempo - b.tempo;
+      })
+      .slice(0, 10);
+
+    return res.json(rankingComUsuario);
+  } catch (error) {
+    console.error("[getRankingByJogoId] Erro:", error);
+    return res.status(500).json({ error: "Erro ao buscar ranking." });
   }
 };

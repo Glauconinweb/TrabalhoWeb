@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BackgroundVideo from "/src/components/BackgroundVideo.jsx";
+import { playSound } from "../utils/audio";
 
 export default function Login() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -79,7 +80,11 @@ export default function Login() {
             ></i>
           </div>
 
-          <button type="submit" className="login">
+          <button
+            onClick={playSound("/sounds/escolha.wav")}
+            type="submit"
+            className="login"
+          >
             Entrar
           </button>
         </form>

@@ -8,17 +8,35 @@
 body,
 html {
   font-family: "Poppins", sans-serif;
+  background-color: #121212;
+  color: #fff;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* Fundo com vídeo */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: -1;
 }
 
 /* Conteiner principal */
 .conteiner1 {
   max-width: 800px;
   margin: 80px auto;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
 }
 
 /* Títulos */
@@ -28,10 +46,12 @@ h2 {
   margin-bottom: 20px;
   color: #66bb6a;
 }
+
 h3 {
   font-size: 1.3rem;
   margin: 20px 0 10px;
   color: #a5d6a7;
+  text-align: center;
 }
 
 /* Formulário */
@@ -64,7 +84,7 @@ select:focus {
   outline: 2px solid #66bb6a;
 }
 
-/* Estrutura do jogo (par termo-definição/item-categoria) */
+/* Estrutura do jogo */
 .estrutura {
   display: flex;
   flex-wrap: wrap;
@@ -79,34 +99,41 @@ select:focus {
 
 /* Botões */
 button {
-  background: linear-gradient(90deg, #43a047, #2e7d32);
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
   color: #fff;
   border: none;
-  border-radius: 25px;
-  padding: 10px 24px;
+  border-radius: 12px;
+  padding: 12px 20px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
+  width: 100%;
+  max-width: 300px;
+  margin: 12px auto;
+  display: block;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.25);
+  box-shadow: 0 6px 20px rgba(102, 187, 106, 0.25);
+  backdrop-filter: blur(2px);
+  text-align: center;
 }
 
 button:hover {
-  background: linear-gradient(90deg, #2e7d32, #43a047);
-  transform: scale(1.03);
+  background: linear-gradient(135deg, #388e3c, #66bb6a);
+  transform: translateY(-2px) scale(1.02);
 }
 
 /* Botão de excluir */
 li button {
-  background: #1ea31e62;
-  padding: 6px 16px;
-  border-radius: 20px;
+  background: rgba(30, 163, 30, 0.5);
+  padding: 8px 16px;
+  border-radius: 8px;
   font-size: 0.9rem;
-  margin-left: 10px;
+  margin-left: 0;
+  width: auto;
 }
 
 li button:hover {
-  background: #53f508;
+  background: #4caf50;
 }
 
 /* Lista de pares e jogos */
@@ -129,18 +156,19 @@ ul li {
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Links ou ações */
+/* Links */
 a,
 button:link {
   text-decoration: none;
   color: inherit;
 }
 
-/* Mensagem de nenhum jogo criado */
+/* Mensagens */
 p {
   font-size: 1rem;
   color: #ccc;
   margin-top: 10px;
+  text-align: center;
 }
 
 /* Linha divisória */
@@ -151,9 +179,89 @@ hr {
   margin: 2rem 0;
 }
 
+/* Jogo da Memória */
+.memory-container {
+  text-align: center;
+  padding: 2rem;
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 15px;
+  justify-items: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.memory-card {
+  width: 100px;
+  height: 100px;
+  perspective: 1000px;
+  cursor: pointer;
+  position: relative;
+}
+
+.memory-card-inner {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.memory-card.flipped .memory-card-inner {
+  transform: rotateY(180deg);
+}
+
+.memory-card-front,
+.memory-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Carta virada (com imagem) */
+.memory-card-back {
+  background-color: #ffffff;
+  transform: rotateY(180deg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.memory-card-back img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* Carta fechada estilo baralho com interrogação */
+.memory-card-front {
+  background: linear-gradient(135deg, #a1eba9, #172217);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+.memory-card-front::after {
+  content: "?";
+}
+#e:hover {
+  background-color: red;
+}
+
 /* Responsividade */
 @media (max-width: 600px) {
-  .conteiner {
+  .conteiner1 {
     margin: 40px 12px;
     padding: 24px;
   }
@@ -163,7 +271,7 @@ hr {
   }
 
   button {
-    width: 100%;
+    max-width: 100%;
   }
 
   ul li {
