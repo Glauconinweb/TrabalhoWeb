@@ -17,11 +17,14 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const resposta = await fetch("http://localhost:5000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, senha }),
-      });
+      const resposta = await fetch(
+        "https://plataformagames.onrender.com/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, senha }),
+        }
+      );
 
       const dados = await resposta.json();
 

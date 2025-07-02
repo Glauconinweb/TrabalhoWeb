@@ -47,7 +47,7 @@ export default function Jogar() {
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-    fetch(`http://localhost:5000/games/${id}`, {
+    fetch(`https://plataformagames.onrender.com/games/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

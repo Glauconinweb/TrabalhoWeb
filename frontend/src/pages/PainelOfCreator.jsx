@@ -118,14 +118,17 @@ export default function PainelOfCreator() {
     const novoJogo = { titulo, tipo, estrutura, criadorId };
     try {
       const token = sessionStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/games/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(novoJogo),
-      });
+      const res = await fetch(
+        "https://plataformagames.onrender.com/games/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(novoJogo),
+        }
+      );
       const data = await res.json();
       if (res.ok) {
         alert("Jogo criado com sucesso! Código: " + data.codigoAcesso);

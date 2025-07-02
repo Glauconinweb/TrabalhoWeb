@@ -59,7 +59,8 @@ const GameResult = ({ score, erros, time, jogoId }) => {
         const token = sessionStorage.getItem("token");
         const response = await fetch(
           `${
-            import.meta.env.VITE_API_URL || "http://localhost:5000"
+            import.meta.env.VITE_API_URL ||
+            "https://plataformagames.onrender.com:5000"
           }/games/ranking/${jogoId}`,
           {
             headers: {

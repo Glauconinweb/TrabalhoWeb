@@ -10,7 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-    fetch("http://localhost:5000/games/all", {
+    fetch("https://plataformagames.onrender.com/games/all", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

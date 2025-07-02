@@ -12,7 +12,7 @@ export default function VerifyEmail() {
     const verificarEmail = async () => {
       try {
         const resposta = await fetch(
-          `http://locahost:5000/auth/verify-email/${token}`
+          `https://plataformagames.onrender.com/auth/verify-email/${token}`
         );
         const texto = await resposta.text();
 
