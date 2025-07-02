@@ -17,7 +17,7 @@ export default function Register() {
     e.preventDefault();
     try {
       const res = await fetch(
-        "https://plataformagames.onrender.com:5000/auth/register",
+        "https://plataformagames.onrender.com/auth/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
