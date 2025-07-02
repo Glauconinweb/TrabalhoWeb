@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BackgroundVideo from "/src/components/BackgroundVideo.jsx";
 import { playSound } from "../utils/audio";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -93,7 +94,7 @@ export default function Login() {
         </form>
 
         <p className="register-link">
-          Não tem uma conta? <a href="/register">Cadastre-se aqui!</a>
+          Não tem uma conta? <Link to="/register">Cadastre-se aqui!</Link>
         </p>
 
         <button onClick={irparaforgot} className="login">
