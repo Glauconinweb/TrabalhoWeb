@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://plataformagames.onrender.com",
+  "https://plataformagames-nyle.onrender.com",
 ];
 
 app.use(express.json());
