@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import BackgroundVideo from "/src/components/BackgroundVideo.jsx";
 import { playSound } from "../utils/audio";
-import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -39,9 +38,9 @@ export default function Login() {
 
       // ✅ Redirecionamento baseado no papel (role)
       if (dados.usuario.role === "criador") {
-        navigate("/painelOfCreator"); // jogador vai para o painel do criador
+        navigate("/painelOfCreator");
       } else {
-        navigate("/home"); // jogador vai para página padrão
+        navigate("/home");
       }
     } catch (erro) {
       alert("Erro de conexão com o servidor.");
@@ -85,7 +84,7 @@ export default function Login() {
           </div>
 
           <button
-            onClick={playSound("/sounds/escolha.wav")}
+            onClick={() => playSound("/sounds/escolha.wav")}
             type="submit"
             className="login"
           >
