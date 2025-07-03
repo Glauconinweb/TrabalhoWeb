@@ -33,10 +33,12 @@ export default function Login() {
         return;
       }
 
+      // Tocar som só após sucesso
+      playSound("/sounds/escolha.wav");
+
       sessionStorage.setItem("token", dados.token);
       sessionStorage.setItem("usuarioLogado", JSON.stringify(dados.usuario));
 
-      // ✅ Redirecionamento baseado no papel (role)
       if (dados.usuario.role === "criador") {
         navigate("/painelOfCreator");
       } else {
@@ -83,11 +85,7 @@ export default function Login() {
             ></i>
           </div>
 
-          <button
-            onClick={() => playSound("/sounds/escolha.wav")}
-            type="submit"
-            className="login"
-          >
+          <button type="submit" className="login">
             Entrar
           </button>
         </form>

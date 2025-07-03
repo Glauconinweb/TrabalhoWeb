@@ -102,17 +102,17 @@ export default function Jogar() {
       if (cards[first].imagemUrl === cards[second].imagemUrl) {
         setMatchedIndices((prev) => [...prev, first, second]);
         setScore((prev) => prev + 10);
-        playSound("/public/sounds/correto.wav");
+        playSound("/sounds/correto.wav");
         setCorrectStreak((prev) => prev + 1);
         if (correctStreak + 1 >= 3) {
           setScore((prev) => prev + 5);
-          playSound("/public/sounds/escolha.wav");
+          playSound("/sounds/escolha.wav");
         }
         setFeedback("Par encontrado!");
       } else {
         setErros((prev) => prev + 1);
         setCorrectStreak(0);
-        playSound("/public/sounds/erro.wav");
+        playSound("/sounds/erro.wav");
         setFeedback("Errado! Tente novamente.");
       }
 
@@ -147,16 +147,16 @@ export default function Jogar() {
       setFeedback("Correto!");
       setScore((prev) => prev + points);
       setCorrectStreak((prev) => prev + 1);
-      playSound("/public/sounds/correto.wav");
+      playSound("/sounds/correto.wav");
       if (correctStreak + 1 >= 3) {
         setScore((prev) => prev + 5);
-        playSound("/public/sounds/escolha.wav");
+        playSound("/sounds/escolha.wav");
       }
     } else {
       setFeedback("Errado! Tente novamente.");
       setErros((prev) => prev + 1);
       setCorrectStreak(0);
-      playSound("/public/sounds/erro.wav");
+      playSound("/sounds/erro.wav");
     }
 
     setTimeout(() => {
@@ -312,16 +312,16 @@ export default function Jogar() {
       setFeedback("Correto!");
       setScore((prev) => prev + points);
       setCorrectStreak((prev) => prev + 1);
-      playSound("/public/sounds/correto.wav");
+      playSound("/sounds/correto.wav");
       if (correctStreak + 1 >= 3) {
         setScore((prev) => prev + 5);
-        playSound("/public/sounds/escolha.wav");
+        playSound("/sounds/escolha.wav");
       }
     } else {
       setFeedback("Errado! Tente novamente.");
       setErros((prev) => prev + 1);
       setCorrectStreak(0);
-      playSound("/public/sounds/erro.wav");
+      playSound("/sounds/erro.wav");
     }
 
     setTimeout(() => {
