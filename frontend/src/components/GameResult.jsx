@@ -20,7 +20,8 @@ const GameResult = ({ score, erros, time, jogoId }) => {
       try {
         const response = await fetch(
           `${
-            import.meta.env.VITE_API_URL || "http://localhost:5000"
+            import.meta.env.VITE_API_URL ||
+            "https://plataformagames.onrender.com"
           }/games/results`,
           {
             method: "POST",
@@ -60,7 +61,7 @@ const GameResult = ({ score, erros, time, jogoId }) => {
         const response = await fetch(
           `${
             import.meta.env.VITE_API_URL ||
-            "https://plataformagames.onrender.com:5000"
+            "https://plataformagames.onrender.com"
           }/games/ranking/${jogoId}`,
           {
             headers: {
