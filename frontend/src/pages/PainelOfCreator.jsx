@@ -33,9 +33,12 @@ export default function PainelOfCreator() {
   const buscarMeusJogos = async (criadorId) => {
     const token = sessionStorage.getItem("token");
     try {
-      const res = await fetch("plataformagames.onrender.com/games/all", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        "https://plataformagames.onrender.com/games/all",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await res.json();
       if (Array.isArray(data)) {
         setMeusJogos(data.filter((jogo) => jogo.criadorId === criadorId));
@@ -49,10 +52,13 @@ export default function PainelOfCreator() {
     if (!window.confirm("Tem certeza que deseja excluir este jogo?")) return;
     const token = sessionStorage.getItem("token");
     try {
-      const res = await fetch(`plataformagames.onrender.com/games/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `https://plataformagames.onrender.com/games/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (res.ok) {
         setMeusJogos((prev) => prev.filter((j) => j.id !== id));
         alert("Jogo excluído com sucesso!");
