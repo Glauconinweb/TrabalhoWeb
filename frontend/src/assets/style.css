@@ -42,7 +42,7 @@ video {
   width: 420px;
   margin: 0 auto;
   background: url("../public/Goku.gif") no-repeat center center;
-  background-size: cover; /* faz a imagem preencher todo o espaço */
+  background-size: cover;
   border: 2px solid;
   border-radius: 10px;
   color: #fff;
@@ -65,7 +65,7 @@ video {
 
 .input-box {
   position: relative;
-  padding: 20px 0;
+  padding: 19px 0;
 }
 
 .input-box input {
