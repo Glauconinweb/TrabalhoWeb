@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import BackgroundVideo from "/src/components/BackgroundVideo.jsx";
 import "/src/assets/pro.css";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "https://plataformagames.onrender.com";
+
 const GameResult = ({ score, erros, time, jogoId }) => {
   const navigate = useNavigate();
   const [saveStatus, setSaveStatus] = useState("Salvando resultado...");
@@ -13,32 +16,29 @@ const GameResult = ({ score, erros, time, jogoId }) => {
     const saveGameResult = async () => {
       const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
       const token = sessionStorage.getItem("token");
+
       if (!usuario || !usuario.id || !token) {
         setSaveStatus("Resultado não salvo (usuário não logado).");
         return;
       }
+
       try {
-        const response = await fetch(
-          `${
-            import.meta.env.VITE_API_URL ||
-            "https://plataformagames.onrender.com"
-          }/games/results`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              userId: usuario.id.toString(),
-              jogoId: jogoId?.toString(),
-              acertos: Math.floor(score / 10),
-              erros,
-              tempo: Math.round(time),
-              pontuacao: score,
-            }),
-          }
-        );
+        const response = await fetch(`${API_BASE_URL}/games/results`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userId: usuario.id.toString(),
+            jogoId: jogoId?.toString(),
+            acertos: Math.floor(score / 10),
+            erros,
+            tempo: Math.round(time),
+            pontuacao: score,
+          }),
+        });
+
         if (!response.ok) {
           const errorData = await response.json();
           setSaveStatus(
@@ -59,10 +59,7 @@ const GameResult = ({ score, erros, time, jogoId }) => {
       try {
         const token = sessionStorage.getItem("token");
         const response = await fetch(
-          `${
-            import.meta.env.VITE_API_URL ||
-            "https://plataformagames.onrender.com"
-          }/games/ranking/${jogoId}`,
+          `${API_BASE_URL}/games/ranking/${jogoId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -72,16 +69,21 @@ const GameResult = ({ score, erros, time, jogoId }) => {
         if (!response.ok) throw new Error("Erro ao buscar ranking.");
         const data = await response.json();
         setRanking(data);
-      } catch (err) {
+      } catch {
         setRanking([]);
       }
     };
 
-    saveGameResult();
-    // eslint-disable-next-line
+    if (jogoId) saveGameResult();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [score, erros, time, jogoId]);
 
-  const handleRestartGame = () => window.location.reload();
+  const handleRestartGame = () => {
+    // Navega para a mesma rota do jogo, forçando reload para reiniciar
+    navigate(`/jogar/${jogoId}`, { replace: true });
+    setTimeout(() => window.location.reload(), 100);
+  };
+
   const handleGoHome = () => navigate("/home");
 
   return (
@@ -96,15 +98,17 @@ const GameResult = ({ score, erros, time, jogoId }) => {
         <p>Erros: {erros}</p>
         <p>Tempo: {time.toFixed(2)} segundos</p>
         <p>{saveStatus}</p>
+
         <div>
           <button onClick={handleRestartGame}>Reiniciar Jogo</button>
           <br />
-          <button onClick={handleGoHome}>Area Games</button>
+          <button onClick={handleGoHome}>Área Games</button>
           <br />
           <button onClick={() => setShowRanking((v) => !v)}>
             {showRanking ? "Esconder Ranking" : "Ver Ranking"}
           </button>
         </div>
+
         {showRanking && (
           <div className="ranking-list">
             <h3>Ranking do Jogo</h3>
