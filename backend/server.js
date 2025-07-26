@@ -1,11 +1,8 @@
-// src/server.js
+// src/server.js ou app.js
 
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-
 import authRoutes from "./src/routes/authRouter.js";
 import gameRoutes from "./src/routes/gameRoutes.js";
 
@@ -13,9 +10,6 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -41,10 +35,8 @@ app.use(
 app.use("/auth", authRoutes);
 app.use("/games", gameRoutes);
 
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+app.get("/", (req, res) => {
+  res.send("Servidor rodando! ✅");
 });
 
 app.listen(PORT, "0.0.0.0", () => {
