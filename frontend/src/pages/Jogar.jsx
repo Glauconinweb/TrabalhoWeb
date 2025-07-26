@@ -42,7 +42,7 @@ export default function Jogar() {
     return arr;
   };
 
-  useEffect(() => {
+  const fetchGame = () => {
     const token = sessionStorage.getItem("token");
     fetch(`${import.meta.env.VITE_API_URL}/games/${id}`, {
       headers: {
@@ -77,7 +77,32 @@ export default function Jogar() {
         console.error("Erro ao buscar jogo:", error);
         setJogo(null);
       });
+  };
+
+  useEffect(() => {
+    fetchGame();
+    // eslint-disable-next-line
   }, [id]);
+
+  const resetGame = () => {
+    setCurrentIndex(0);
+    setScore(0);
+    setCorrectStreak(0);
+    setErros(0);
+    setFeedback(null);
+    setSelectedAnswer(null);
+    setGameOver(false);
+    setStartTime(Date.now());
+    setEndTime(null);
+    setFlippedIndices([]);
+    setMatchedIndices([]);
+
+    fetchGame();
+  };
+
+  const handleRestartGame = () => {
+    resetGame();
+  };
 
   const handleCardClick = (index) => {
     if (
@@ -332,6 +357,7 @@ export default function Jogar() {
         erros={erros}
         time={(endTime - startTime) / 1000}
         jogoId={jogo.id}
+        onRestart={handleRestartGame} // Pode passar essa prop para GameResult se quiser botão lá
       />
     );
   }
@@ -351,6 +377,12 @@ export default function Jogar() {
           <p className="feedback-message">{feedback}</p>
         )}
         <p>Pontuação: {score}</p>
+
+        {!gameOver && (
+          <button onClick={handleRestartGame} className="btn-restart">
+            Reiniciar Jogo
+          </button>
+        )}
       </div>
     </>
   );

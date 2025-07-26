@@ -6,7 +6,7 @@ import "/src/assets/pro.css";
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "https://plataformagames.onrender.com";
 
-const GameResult = ({ score, erros, time, jogoId }) => {
+const GameResult = ({ score, erros, time, jogoId, onRestart }) => {
   const navigate = useNavigate();
   const [saveStatus, setSaveStatus] = useState("Salvando resultado...");
   const [ranking, setRanking] = useState([]);
@@ -78,12 +78,6 @@ const GameResult = ({ score, erros, time, jogoId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [score, erros, time, jogoId]);
 
-  const handleRestartGame = () => {
-    // Navega para a mesma rota do jogo, forçando reload para reiniciar
-    navigate(`/jogar/${jogoId}`, { replace: true });
-    setTimeout(() => window.location.reload(), 100);
-  };
-
   const handleGoHome = () => navigate("/home");
 
   return (
@@ -100,7 +94,7 @@ const GameResult = ({ score, erros, time, jogoId }) => {
         <p>{saveStatus}</p>
 
         <div>
-          <button onClick={handleRestartGame}>Reiniciar Jogo</button>
+          <button onClick={onRestart}>Reiniciar Jogo</button>
           <br />
           <button onClick={handleGoHome}>Área Games</button>
           <br />
