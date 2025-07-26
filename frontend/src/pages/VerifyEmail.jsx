@@ -12,7 +12,7 @@ export default function VerifyEmail() {
     const verificarEmail = async () => {
       try {
         const resposta = await fetch(
-          `https://plataformagames.onrender.com/auth/verify-email/${token}`
+          `${import.meta.env.VITE_API_URL}/auth/verify-email/${token}`
         );
         const texto = await resposta.text();
 

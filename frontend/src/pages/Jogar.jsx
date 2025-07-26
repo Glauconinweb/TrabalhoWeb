@@ -18,18 +18,15 @@ export default function Jogar() {
   const [gameOver, setGameOver] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
 
-  // Estado para jogo-memoria
   const [cards, setCards] = useState([]);
-  const [flippedIndices, setFlippedIndices] = useState([]); // indices das cartas viradas
-  const [matchedIndices, setMatchedIndices] = useState([]); // indices das cartas já encontradas
+  const [flippedIndices, setFlippedIndices] = useState([]);
+  const [matchedIndices, setMatchedIndices] = useState([]);
 
-  // Função para tocar sons
   const playSound = (src) => {
     const audio = new Audio(src);
     audio.play().catch((e) => console.warn("Erro ao tocar som:", e));
   };
 
-  // Embaralhar array
   const shuffleArray = (array) => {
     let currentIndex = array.length,
       randomIndex;
@@ -47,7 +44,7 @@ export default function Jogar() {
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-    fetch(`https://plataformagames.onrender.com/games/${id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/games/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -70,7 +67,6 @@ export default function Jogar() {
         } else if (data.tipo === "item-categoria") {
           setGameData(shuffleArray(data.estrutura));
         } else if (data.tipo === "jogo-memoria") {
-          // Criar pares (duplicar) e embaralhar
           const duplicated = [...data.estrutura, ...data.estrutura];
           setCards(shuffleArray(duplicated));
         } else if (data.tipo === "jogo-sabedoria") {
@@ -81,10 +77,7 @@ export default function Jogar() {
         console.error("Erro ao buscar jogo:", error);
         setJogo(null);
       });
-    // eslint-disable-next-line
   }, [id]);
-
-  // --- Lógica jogo-memoria ---
 
   const handleCardClick = (index) => {
     if (
@@ -116,7 +109,6 @@ export default function Jogar() {
         setFeedback("Errado! Tente novamente.");
       }
 
-      // Desvirar as cartas depois de 1.5s
       setTimeout(() => {
         setFlippedIndices([]);
         setFeedback(null);
@@ -134,8 +126,6 @@ export default function Jogar() {
       setGameOver(true);
     }
   }, [matchedIndices, cards, jogo]);
-
-  // --- Lógica jogo-sabedoria ---
 
   const handleAnswerSabedoria = (answer) => {
     setSelectedAnswer(answer);
@@ -170,8 +160,6 @@ export default function Jogar() {
       }
     }, 1500);
   };
-
-  // --- Renderização do conteúdo ---
 
   const renderGameContent = () => {
     if (jogo.tipo === "termo-definicao") {
@@ -294,7 +282,6 @@ export default function Jogar() {
     return <p>Tipo de jogo não suportado.</p>;
   };
 
-  // Reuso da função para termo-definição e item-categoria
   const handleAnswer = (answer) => {
     setSelectedAnswer(answer);
     let isCorrect = false;

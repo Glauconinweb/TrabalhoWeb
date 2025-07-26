@@ -33,12 +33,9 @@ export default function PainelOfCreator() {
   const buscarMeusJogos = async (criadorId) => {
     const token = sessionStorage.getItem("token");
     try {
-      const res = await fetch(
-        "https://plataformagames.onrender.com/games/all",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/games/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       if (Array.isArray(data)) {
         setMeusJogos(data.filter((jogo) => jogo.criadorId === criadorId));
@@ -52,13 +49,10 @@ export default function PainelOfCreator() {
     if (!window.confirm("Tem certeza que deseja excluir este jogo?")) return;
     const token = sessionStorage.getItem("token");
     try {
-      const res = await fetch(
-        `https://plataformagames.onrender.com/games/${id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/games/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (res.ok) {
         setMeusJogos((prev) => prev.filter((j) => j.id !== id));
         alert("Jogo excluído com sucesso!");
@@ -124,17 +118,14 @@ export default function PainelOfCreator() {
     const novoJogo = { titulo, tipo, estrutura, criadorId };
     try {
       const token = sessionStorage.getItem("token");
-      const res = await fetch(
-        "https://plataformagames.onrender.com/games/create",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(novoJogo),
-        }
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/games/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(novoJogo),
+      });
       const data = await res.json();
       if (res.ok) {
         alert("Jogo criado com sucesso! Código: " + data.codigoAcesso);
@@ -302,7 +293,7 @@ export default function PainelOfCreator() {
 
           <button
             className="as"
-            onClick={playSound("/sounds/escolha.wav")}
+            onClick={() => playSound("/sounds/escolha.wav")}
             type="submit"
           >
             Criar Jogo

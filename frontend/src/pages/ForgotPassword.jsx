@@ -16,7 +16,7 @@ export default function ForgotPassword() {
 
     try {
       const res = await fetch(
-        "https://plataformagames.onrender.com/auth/forgot-password",
+        `${import.meta.env.VITE_API_URL}/auth/forgot-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
